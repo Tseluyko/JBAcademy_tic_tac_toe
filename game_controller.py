@@ -1,10 +1,12 @@
 from play_ground import PlayGround
 from enum import Enum
+from ai import *
 
 
 class PlayerMode(Enum):
     USER = "user"
     EASY = "easy"
+    MEDIUM = "medium"
 
 
 class GameState(Enum):
@@ -17,8 +19,17 @@ class GameController:
         self.pg = PlayGround()
         self.first_mode = PlayerMode.USER
         self.second_mode = PlayerMode.USER
+        self.first_ai = AI('X')
+        self.second_ai = AI('O')
         self.state = GameState.MENU
         self.is_first = True
+
+    def init_ai(self, mode, sign):
+        if mode == PlayerMode.EASY:
+            return EasyAI(sign)
+        if mode == PlayerMode.MEDIUM:
+            return MediumAi(sign)
+        return None
 
     def main_menu(self):
         args = input('Input command: ').split()
@@ -27,7 +38,9 @@ class GameController:
                 print('Bad parameters!')
                 return
             self.first_mode = PlayerMode(args[1])
+            self.first_ai = self.init_ai(self.first_mode, 'X')
             self.second_mode = PlayerMode(args[2])
+            self.second_ai = self.init_ai(self.second_mode, 'O')
             self.state = GameState.GAME
             self.is_first = True
             self.pg.clear()
@@ -49,13 +62,23 @@ class GameController:
 
     def make_tour(self, mode):
         if mode == PlayerMode.USER:
-            if not self.pg.set(*self.user_processing()):
+            if not self.pg.user_set(*self.user_processing()):
                 return False
-        if mode == PlayerMode.EASY:
-            self.pg.ai_run("easy")
+        else:
+            self.ai_run()
         if self.pg.calculate():
             self.state = GameState.MENU
         return True
+
+    def ai_run(self):
+        if self.is_first:
+            print(f'Making move level "{self.first_ai.get_name()}"')
+            result = self.first_ai.get_result(self.pg.space)
+            self.pg.set(result[0], result[1], self.first_ai.sign)
+        else:
+            print(f'Making move level "{self.second_ai.get_name()}"')
+            result = self.second_ai.get_result(self.pg.space)
+            self.pg.set(result[0], result[1], self.second_ai.sign)
 
     def game(self):
         if self.is_first:
