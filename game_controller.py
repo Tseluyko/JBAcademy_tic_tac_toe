@@ -7,6 +7,7 @@ class PlayerMode(Enum):
     USER = "user"
     EASY = "easy"
     MEDIUM = "medium"
+    HARD = "hard"
 
 
 class GameState(Enum):
@@ -24,11 +25,14 @@ class GameController:
         self.state = GameState.MENU
         self.is_first = True
 
-    def init_ai(self, mode, sign):
+    @staticmethod
+    def init_ai(mode, sign):
         if mode == PlayerMode.EASY:
             return EasyAI(sign)
         if mode == PlayerMode.MEDIUM:
             return MediumAi(sign)
+        if mode == PlayerMode.HARD:
+            return HardAi(sign)
         return None
 
     def main_menu(self):
@@ -47,7 +51,8 @@ class GameController:
         if args[0] == 'exit':
             exit(0)
 
-    def user_processing(self):
+    @staticmethod
+    def user_processing():
         data_in = input('Enter the coordinates: ').split()
         if len(data_in) == 2:
             coord_y = data_in[0]
@@ -93,4 +98,3 @@ class GameController:
             return self.main_menu()
         if self.state == GameState.GAME:
             return self.game()
-

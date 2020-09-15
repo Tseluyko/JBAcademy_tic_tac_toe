@@ -1,6 +1,3 @@
-import random
-
-
 class PlayGround:
     def __init__(self):
         self.space = self.get_clear_space()
